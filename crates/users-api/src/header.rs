@@ -1,9 +1,11 @@
 //! Used for the auth header
 
-
-
+use crate::bearer::BearerToken;
+use crate::error::AuthError;
 use actix_web::error::ParseError;
-use actix_web::http::header::{Header, HeaderName, HeaderValue, InvalidHeaderValue, TryIntoHeaderValue};
+use actix_web::http::header::{
+    Header, HeaderName, HeaderValue, InvalidHeaderValue, TryIntoHeaderValue,
+};
 use actix_web::HttpMessage;
 use log::{error, info};
 use nom::branch::alt;
@@ -13,13 +15,11 @@ use nom::combinator::{complete, eof};
 use nom::error::ErrorKind;
 use nom::multi::many0;
 use nom::sequence::{preceded, terminated};
-use crate::bearer::BearerToken;
-use crate::error::AuthError;
 
 /// Authorization header
 #[derive(Debug)]
 pub struct Authorization {
-    bearer: BearerToken
+    bearer: BearerToken,
 }
 
 impl Authorization {
@@ -33,7 +33,6 @@ impl Authorization {
         &self.bearer
     }
 }
-
 
 impl TryIntoHeaderValue for Authorization {
     type Error = InvalidHeaderValue;
@@ -49,21 +48,17 @@ impl Header for Authorization {
     }
 
     fn parse<M: HttpMessage>(msg: &M) -> Result<Self, ParseError> {
-         match msg.headers().get(Authorization::name()) {
-             None => {
-                 Err(ParseError::Incomplete)
-             }
-             Some(value) => {
-                 let as_string = String::from_utf8_lossy(value.as_bytes());
-                 info!("auth header value: {}", as_string);
+        match msg.headers().get(Authorization::name()) {
+            None => Err(ParseError::Incomplete),
+            Some(value) => {
+                let as_string = String::from_utf8_lossy(value.as_bytes());
+                info!("auth header value: {}", as_string);
 
-                 let bearer = as_string.replace("Bearer ", "");
+                let bearer = as_string.replace("Bearer ", "");
 
-                 let bearer = BearerToken::from(bearer);
-                 Ok(Authorization {
-                     bearer,
-                 })
-             }
-         }
+                let bearer = BearerToken::from(bearer);
+                Ok(Authorization { bearer })
+            }
+        }
     }
 }

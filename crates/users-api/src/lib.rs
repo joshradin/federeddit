@@ -1,15 +1,14 @@
 //! User apis
 
-
 use chrono::{DateTime, Utc};
 pub use email_address::EmailAddress;
 
-pub mod user_service;
+pub mod auth;
 pub mod bearer;
 pub mod error;
-pub mod header;
 pub mod guard;
-pub mod auth;
+pub mod header;
+pub mod user_service;
 
 /// Common type for expiration
 pub type ExpirationTime = DateTime<Utc>;

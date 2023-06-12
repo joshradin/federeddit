@@ -50,12 +50,9 @@ impl PasswordAuth {
 
 impl From<SaltString> for PasswordAuth {
     fn from(value: SaltString) -> Self {
-        Self {
-            salt: value
-        }
+        Self { salt: value }
     }
 }
-
 
 /// An error occurred with passwords
 #[derive(Debug, Error)]
@@ -65,5 +62,5 @@ pub enum PasswordError {
     #[error("invalid password hash: {0}")]
     InvalidPasswordHash(String),
     #[error("no password was found")]
-    NoPasswordFound
+    NoPasswordFound,
 }

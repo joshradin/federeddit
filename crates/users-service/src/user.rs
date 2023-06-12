@@ -27,8 +27,13 @@ impl PublicUser {
     ) -> QueryResult<PublicUser> {
         use crate::schema::user::dsl;
 
-        if user.select(InternalUser::as_select()).filter(dsl::email.eq(email)).first(conn).is_ok() {
-            return Err(diesel::result::Error::NotFound)
+        if user
+            .select(InternalUser::as_select())
+            .filter(dsl::email.eq(email))
+            .first(conn)
+            .is_ok()
+        {
+            return Err(diesel::result::Error::NotFound);
         }
 
         insert_into(dsl::user)

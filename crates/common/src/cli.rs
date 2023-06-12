@@ -1,10 +1,10 @@
 //! Used for common cli components
 
-use std::path::PathBuf;
-use clap::{Parser, ArgAction, Args};
+use clap::{ArgAction, Args, Parser};
 use openssl::error::ErrorStack;
 use openssl::ssl::{SslAcceptor, SslAcceptorBuilder, SslContext, SslFiletype, SslMethod};
 use openssl::x509::X509;
+use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 pub struct LoggingArgs {
@@ -30,7 +30,7 @@ pub struct CommonArgs {
     pub logging: LoggingArgs,
     /// Contains web server args.
     #[clap(flatten)]
-    pub server: WebServerArgs
+    pub server: WebServerArgs,
 }
 
 /// Used for security purposes, usually for TLS.
@@ -48,21 +48,23 @@ pub struct SecurityArgs {
     cert_key: Option<PathBuf>,
     /// Path to a root authority
     #[clap(long)]
-    capath: Option<PathBuf>
+    capath: Option<PathBuf>,
 }
 
 impl SecurityArgs {
-
     /// Creates an ssl context from the security args
     pub fn ssl_acceptor(&self) -> Result<SslAcceptorBuilder, SecurityBuilderError> {
         let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls())?;
         if let Some(cert) = &self.cert {
-            let cery_key = self.cert_key.as_ref().expect("will always be present if cert is present");
+            let cery_key = self
+                .cert_key
+                .as_ref()
+                .expect("will always be present if cert is present");
 
             builder.set_certificate_file(cert, SslFiletype::PEM)?;
             builder.set_private_key_file(cery_key, SslFiletype::PEM)?;
         } else {
-            return Err(SecurityBuilderError::NotPresent)
+            return Err(SecurityBuilderError::NotPresent);
         }
 
         if let Some(ca) = &self.capath {
@@ -78,5 +80,5 @@ pub enum SecurityBuilderError {
     #[error("No ssl context was built")]
     NotPresent,
     #[error(transparent)]
-    OpensslError(#[from] ErrorStack)
+    OpensslError(#[from] ErrorStack),
 }

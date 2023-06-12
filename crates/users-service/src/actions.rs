@@ -11,11 +11,11 @@ use base64::alphabet::URL_SAFE;
 use base64::engine::general_purpose::PAD;
 use base64::engine::GeneralPurpose;
 use base64::Engine;
+use chrono::Duration;
 use diesel::QueryDsl;
 use hmac::digest::typenum::op;
 use serde::Deserialize;
 use std::error::Error;
-use chrono::Duration;
 use tracing::instrument;
 use users_api::auth::PasswordAuth;
 use users_api::error::AuthError;
@@ -98,7 +98,9 @@ pub async fn login_user(
     })
     .await??;
 
-    let token  = auth.create_token(&user, Duration::days(30))?;
+    let token = auth.create_token(&user, Duration::days(30))?;
 
-    Ok(HttpResponse::Ok().insert_header((AUTHORIZATION, token.to_string())).finish())
+    Ok(HttpResponse::Ok()
+        .insert_header((AUTHORIZATION, token.to_string()))
+        .finish())
 }

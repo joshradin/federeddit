@@ -1,8 +1,8 @@
-use std::time::Instant;
+use crate::auth::PasswordError;
 use actix_web::http::StatusCode;
 use actix_web::ResponseError;
 use chrono::{DateTime, Utc};
-use crate::auth::PasswordError;
+use std::time::Instant;
 
 #[derive(Debug, thiserror::Error)]
 pub enum AuthError {

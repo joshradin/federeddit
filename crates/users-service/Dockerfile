@@ -1,4 +1,6 @@
-FROM ubuntu:latest
-LABEL authors="joshuaradin"
+FROM diploforum-apps as builder
+FROM alpine
+EXPOSE 8080/tcp
 
-ENTRYPOINT ["top", "-b"]
+COPY --from=builder /usr/local/cargo/bin/users-service /usr/local/bin/users-service
+CMD ["users-service", "--port", "8080", "--ip", "0.0.0.0"]

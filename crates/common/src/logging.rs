@@ -1,11 +1,12 @@
+use crate::cli::LoggingArgs;
+use log::LevelFilter;
 use log4rs::append::console::ConsoleAppender;
-use log4rs::Config;
 use log4rs::config::{Appender, Root};
 use log4rs::encode::pattern::PatternEncoder;
-use log::LevelFilter;
-use crate::cli::LoggingArgs;
+use log4rs::Config;
 
-static LOG_ENCODING: &str = r#"{d(%Y-%m-%d %H:%M:%S%.3f)} [{h({l:7})}] \({({M}:{L}):>32.48}\) - {m}{n}"#;
+static LOG_ENCODING: &str =
+    r#"{d(%Y-%m-%d %H:%M:%S%.3f)} [{h({l:7})}] \({({M}:{L}):>32.48}\) - {m}{n}"#;
 
 /// initialize logging for a binary.
 pub fn init_logging(logging_args: &LoggingArgs) {
