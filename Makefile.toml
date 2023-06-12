@@ -1,4 +1,16 @@
+[env]
+CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+
 [tasks.format]
 install_crate = "rustfmt"
 command = "cargo"
 args = ["fmt", "--", "--emit=files"]
+
+[tasks.build_base_docker_image]
+workspace = false
+command = "docker"
+args = ["build", "-t", "diploforum-apps", "."]
+
+[tasks.build_docker_images]
+#workspace = false
+run_task = { name="build_docker_image", fork=true}
