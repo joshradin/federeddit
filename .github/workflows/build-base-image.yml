@@ -1,0 +1,22 @@
+name: build-base-image
+run-name: Build base image
+on:
+  push:
+    branches:
+      - main
+jobs:
+  create-builder:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build and export
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        tags: base-image:latest
+        outputs: type=docker,dest=/tmp/base-image.tar
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: base-image
+        path: /tmp/base-image.tar

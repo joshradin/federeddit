@@ -1,4 +1,4 @@
-FROM diploforum-apps as builder
+FROM base-image as builder
 FROM alpine
 EXPOSE 8080/tcp
 

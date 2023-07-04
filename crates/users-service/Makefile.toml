@@ -1,4 +1,0 @@
-[tasks.build_docker_image]
-command = "docker"
-args = ["build", "-t", "${CARGO_MAKE_PROJECT_NAME}", "."]
-dependencies = ["build_docker_base_image"]
