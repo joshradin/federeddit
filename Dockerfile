@@ -3,7 +3,7 @@ WORKDIR /usr/src/app
 COPY Cargo.toml .
 COPY Cargo.lock .
 COPY crates crates
-RUN --mount=type=cache,target=/usr/local/cargo \
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/usr/src/app/target \
     cargo build --release --bins
 RUN cargo install --path crates/coordinator --root /usr/local/federeddit/
