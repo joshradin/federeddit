@@ -12,4 +12,3 @@ RUN cargo install --path crates/users-service --root /usr/local/federeddit/
 FROM busybox
 WORKDIR /federeddit-apps/
 COPY --from=builder /usr/local/federeddit/bin .
-RUN ls
