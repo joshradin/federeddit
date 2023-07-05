@@ -71,7 +71,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=edge,enable=true,prefix=,suffix=,branch=$repo.default_branch
+            type=edge,enable=true,prefix=,suffix=,branch=main
             type=schedule
             type=ref,event=branch
             type=ref,event=tag
