@@ -47,13 +47,20 @@ impl PublicUser {
         Ok(Self::get_user(conn, email).expect("user should have been created"))
     }
 
-    pub fn get_user(conn: &mut MysqlConnection, email: &str) -> Option<PublicUser> {
+    pub fn get_user(conn: &mut MysqlConnection, id: &str) -> Option<PublicUser> {
         use crate::schema::user::dsl;
 
         let internal = user
-            .filter(dsl::email.eq(email))
+            .filter(dsl::email.eq(id))
             .first::<InternalUser>(conn)
-            .ok()?;
+            .ok()
+            .or_else(|| {
+                user
+                    .filter(dsl::username.eq(id))
+                    .first::<InternalUser>(conn)
+                    .ok()
+            })
+            ?;
 
         Some(PublicUser {
             id: internal.id,

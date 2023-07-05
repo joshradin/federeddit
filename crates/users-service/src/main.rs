@@ -35,8 +35,6 @@ mod user;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 
-const SALT: &str = "SSB0aGluayB5b3Ugc2hvdWxkIGxlYXZlIHdpdGggVGltIFJvYmluc29u";
-
 type Database = Pool<ConnectionManager<MysqlConnection>>;
 
 /// Launches the auth/user service
@@ -60,7 +58,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let secret = b"password";
     let authenticator = Data::new(Authenticator::<PublicUser>::new(secret));
 
-    let passwords = PasswordAuth::new(SALT);
+    let passwords = PasswordAuth::new();
 
     let mut pool = establish_connection();
 

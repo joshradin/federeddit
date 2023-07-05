@@ -1,5 +1,7 @@
 //! Used for the auth header
 
+use std::convert::Infallible;
+use std::str::FromStr;
 use crate::bearer::BearerToken;
 use crate::error::AuthError;
 use actix_web::error::ParseError;
@@ -31,6 +33,16 @@ impl Authorization {
     /// Gets the bearer token
     pub fn bearer(&self) -> &BearerToken {
         &self.bearer
+    }
+}
+
+impl FromStr for Authorization {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let bearer = s.replace("Bearer ", "");
+        let bearer = BearerToken::from(bearer);
+        Ok(Authorization { bearer })
     }
 }
 

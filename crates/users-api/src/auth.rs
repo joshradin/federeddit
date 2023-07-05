@@ -18,22 +18,29 @@ pub trait AuthService {
 /// The password hash factory
 #[derive(Debug, Clone)]
 pub struct PasswordAuth {
-    salt: SaltString,
+    salt: Option<SaltString>,
 }
 
 impl PasswordAuth {
     /// Creates a new password authorizer using a b64 encoded secret
-    pub fn new(salt: &str) -> Self {
+    #[deprecated(note = "salt should be random")]
+    pub fn with_single_salt(salt: &str) -> Self {
         Self {
-            salt: SaltString::from_b64(salt).expect("given salt is not in b64 format"),
+            salt: Some(SaltString::from_b64(salt).expect("given salt is not in b64 format")),
         }
+    }
+
+    /// Creates a new password auth with a random salt value generated for every password
+    pub fn new() -> Self {
+        Self { salt: None }
     }
 
     /// Hashes a password
     pub fn hash_password(&self, password: &[u8]) -> Result<String, PasswordError> {
         let argon = Argon2::default();
+        let ref salt = self.salt.as_ref().cloned().unwrap_or_else(|| SaltString::generate(rand::thread_rng()));
         let hashed = argon
-            .hash_password(password, &self.salt)
+            .hash_password(password, salt)
             .map_err(|e| PasswordError::InvalidPasswordHash(e.to_string()))?;
         Ok(hashed.to_string())
     }
@@ -50,7 +57,7 @@ impl PasswordAuth {
 
 impl From<SaltString> for PasswordAuth {
     fn from(value: SaltString) -> Self {
-        Self { salt: value }
+        Self { salt: Some(value) }
     }
 }
 

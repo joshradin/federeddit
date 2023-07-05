@@ -12,3 +12,4 @@ log = "0.4.18"
 diesel = { version = "2.1.0", default-features=false }
 openssl = "0.10.54"
 thiserror = "1.0.40"
+base64 = "0.21.2"

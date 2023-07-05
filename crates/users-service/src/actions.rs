@@ -1,6 +1,7 @@
 //! Common actions
 
 use crate::authenticator::Authenticator;
+use crate::schema::user::username;
 use crate::user::PublicUser;
 use crate::Database;
 use actix_web::http::header::AUTHORIZATION;
@@ -14,11 +15,12 @@ use base64::Engine;
 use chrono::Duration;
 use diesel::QueryDsl;
 use hmac::digest::typenum::op;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::error::Error;
 use tracing::instrument;
 use users_api::auth::PasswordAuth;
 use users_api::error::AuthError;
+use users_api::{EmailAddress, User};
 
 #[derive(Debug, Deserialize)]
 struct CreateUserBody {
@@ -33,6 +35,10 @@ pub async fn create_user(
     password_hasher: Data<PasswordAuth>,
     cnxn: Data<Database>,
 ) -> actix_web::Result<impl Responder> {
+    if create_user.username.contains("@") {
+        return Ok(HttpResponse::NotAcceptable().body("username can not contain @"));
+    }
+
     web::block(move || {
         let mut conn = cnxn.get().expect("couldn't get db connection from pool");
 
@@ -50,7 +56,13 @@ pub async fn create_user(
     .await?
     .map_err(error::ErrorInternalServerError)?;
 
-    Ok(HttpResponse::Ok())
+    Ok(HttpResponse::Ok().finish())
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct UserInfo {
+    username: String,
+    email: EmailAddress,
 }
 
 #[post("user/login")]
@@ -61,7 +73,7 @@ pub async fn login_user(
     auth: Data<Authenticator<PublicUser>>,
     cnxn: Data<Database>,
 ) -> actix_web::Result<impl Responder> {
-    let (email, password) = if let Some(header_value) = req.headers().get(AUTHORIZATION) {
+    let (identifier, password) = if let Some(header_value) = req.headers().get(AUTHORIZATION) {
         if header_value.as_bytes().starts_with(b"Bearer ") {
             todo!("bearer re-auth")
         } else if header_value.as_bytes().starts_with(b"Basic ") {
@@ -89,8 +101,8 @@ pub async fn login_user(
 
     let user = web::block(move || -> Result<PublicUser, AuthError> {
         let mut conn = cnxn.get().expect("could not get db connection");
-        let user =
-            PublicUser::get_user(&mut conn, &email).ok_or(AuthError::NoUserFound(email.clone()))?;
+        let user = PublicUser::get_user(&mut conn, &identifier)
+            .ok_or(AuthError::NoUserFound(identifier.clone()))?;
 
         user.verify_password(&mut conn, &password_hasher, &password)?;
 
@@ -100,7 +112,11 @@ pub async fn login_user(
 
     let token = auth.create_token(&user, Duration::days(30))?;
 
-    Ok(HttpResponse::Ok()
-        .insert_header((AUTHORIZATION, token.to_string()))
-        .finish())
+    Ok(Json(UserInfo {
+        username: user.username().to_string(),
+        email: user.email(),
+    })
+    .customize()
+    .insert_header((AUTHORIZATION, token.to_string()))
+    )
 }

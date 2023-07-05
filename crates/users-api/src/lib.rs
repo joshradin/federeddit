@@ -9,6 +9,7 @@ pub mod error;
 pub mod guard;
 pub mod header;
 pub mod user_service;
+pub mod client;
 
 /// Common type for expiration
 pub type ExpirationTime = DateTime<Utc>;
