@@ -89,26 +89,14 @@ mod tests {
     use crate::authenticator::Authenticator;
     use chrono::Duration;
     use users_api::{EmailAddress, User};
+    use crate::user::PublicUser;
 
     #[test]
     fn validate_a_token() {
-        struct TestUser;
-        impl User for TestUser {
-            fn username(&self) -> &str {
-                todo!()
-            }
 
-            fn set_username(&mut self, name: &str) {
-                todo!()
-            }
 
-            fn email(&self) -> EmailAddress {
-                EmailAddress::new_unchecked("test@test")
-            }
-        }
-
-        let auth = Authenticator::new(b"password");
-        let bearer = auth.create_token(&TestUser).unwrap();
+        let auth = Authenticator::<PublicUser>::new(b"password");
+        let bearer = auth.create_token(&PublicUser::new(EmailAddress::new_unchecked("test"), "test".to_string()), Duration::days(30)).unwrap();
         auth.validate_token(&bearer).expect("couldn't verify");
     }
 }
