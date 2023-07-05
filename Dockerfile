@@ -8,8 +8,9 @@ RUN --mount=type=cache,target=/usr/local/cargo,from=rust:1.68.1,source=/usr/loca
     cargo build --release --bins
 RUN cargo install --path crates/coordinator --root /usr/local/federeddit/apps
 RUN cargo install --path crates/users-service --root /usr/local/federeddit/apps
+RUN ls /usr/local/federeddit/apps
 
 FROM busybox
-WORKDIR /bin
+WORKDIR /federeddit-apps/
 COPY --from=builder /usr/local/federeddit/apps .
 RUN ls
